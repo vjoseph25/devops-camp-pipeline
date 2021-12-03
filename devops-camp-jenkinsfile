@@ -66,7 +66,7 @@ pipeline {
             steps {
                 echo "Deployment stage"
 		sh 'kubectl -n vjoseph set image deployment/app-deployment --record=true app-deployment=$HARBOR_REGISTRY/$HARBOR_PROJECT/$APP_IMAGE_NAME:$APP_HASH-$PIPELINE_HASH'
-            }
+                sh 'kubectl -n vjoseph apply -f ./afs-labs-student/kubernetes/config-map.yaml'
         }
     }
     post {
