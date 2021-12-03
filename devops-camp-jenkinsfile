@@ -49,6 +49,14 @@ pipeline {
                 }
             }
         }
+        stage('Security scanning') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'vjoseph-harbor-auth', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    echo "Scanning $APP_IMAGE_NAME image"
+                    sh 'python harbor_scanner.py -i $APP_IMAGE_NAME -r $HARBOR_REGISTRY -p $HARBOR_PROJECT -c ${USERNAME}:${PASSWORD}'
+                }
+            }
+        }
         stage('Test'){
             steps {
                 echo "Testing stage"
@@ -58,14 +66,6 @@ pipeline {
             steps {
                 echo "Deployment stage"
 		sh 'kubectl -n vjoseph set image deployment/app-deployment --record=true app-deployment=$HARBOR_REGISTRY/$HARBOR_PROJECT/$APP_IMAGE_NAME:$APP_HASH-$PIPELINE_HASH'
-            }
-        }
-        stage('Security scanning') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'vjoseph-harbor-auth', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    echo "Scanning $APP_IMAGE_NAME image"
-                    sh 'python harbor_scanner.py -i $APP_IMAGE_NAME -r $HARBOR_REGISTRY -p $HARBOR_PROJECT -c ${USERNAME}:${PASSWORD}'
-                }
             }
         }
     }
